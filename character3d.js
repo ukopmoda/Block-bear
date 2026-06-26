@@ -497,17 +497,20 @@ function _build(def) {
     }
 
     if (def.animal === 'beaver') {
-        // Beady eyes sunk into the sides of the head
+        // Beady side eyes — socket sits on head surface, eye protrudes in front of it
         [[-0.76, 1], [0.76, -1]].forEach(([ex, side]) => {
-            const socket = new T.Mesh(new T.SphereGeometry(0.22, 8, 6), darkMat);
-            socket.scale.set(0.80, 0.80, 0.28);
-            socket.position.set(ex, 0.10, 0.57);
+            // Dark flat socket disc, just proud of head surface (surface at ~z=0.83)
+            const socket = new T.Mesh(new T.SphereGeometry(0.20, 8, 6), darkMat);
+            socket.scale.set(1.0, 1.0, 0.12);
+            socket.position.set(ex, 0.10, 0.87);
             head.add(socket);
+            // Small beady eye in front of socket
             const eye = new T.Mesh(new T.SphereGeometry(0.13, 10, 8), eyeMat);
-            eye.position.set(ex, 0.10, 0.62);
+            eye.position.set(ex, 0.10, 0.93);
             head.add(eye);
+            // Tiny shine
             const shine = new T.Mesh(new T.SphereGeometry(0.055, 8, 6), shineMat);
-            shine.position.set(ex + 0.03 * side, 0.15, 0.70);
+            shine.position.set(ex + 0.03 * side, 0.15, 1.00);
             head.add(shine);
         });
     } else {
