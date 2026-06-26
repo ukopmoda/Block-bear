@@ -770,6 +770,9 @@ function drawGhost(piece) {
 
     const { row, col, valid } = getSnapTarget(piece);
 
+    // Cache so tryPlacePiece uses exactly the same target the ghost showed
+    piece._cachedSnap = { row, col, valid };
+
     if (!valid) {
         ghostGraphics.fillStyle(0xa84b3f, 0.45);
         for (const block of piece.shape) {
@@ -832,7 +835,8 @@ function drawGhost(piece) {
 
 function tryPlacePiece(piece) {
 
-    const { row, col, valid } = getSnapTarget(piece);
+    // Use ghost's cached snap so placement always matches what was shown
+    const { row, col, valid } = piece._cachedSnap || getSnapTarget(piece);
 
     if (!valid) {
 
