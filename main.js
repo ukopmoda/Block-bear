@@ -1,5 +1,5 @@
 const _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _TOUCH_LIFT     = 120;  // logical units piece rides above finger on touch
+const _TOUCH_LIFT     = 230;  // logical units piece rides above finger on touch
 
 let score = 0;
 let scoreText;
@@ -144,6 +144,8 @@ class GameScene extends Phaser.Scene {
         resetDialogueFlags();
 
         loadDailyBest();
+
+        this.input.dragDistanceThreshold = 0;
 
         createBoard();
 
@@ -349,7 +351,7 @@ function createHand() {
 
     handPieces = [];
 
-    const trayY = 800;
+    const trayY = 850;
 
     const trayPositions = [134, 320, 506];
 
@@ -435,7 +437,7 @@ function createPieceVisual(
     container.setSize(width, height);
 
     container.setInteractive(
-        new Phaser.Geom.Rectangle(-220, -220, 440, 440),
+        new Phaser.Geom.Rectangle(-160, -160, 320, 320),
         Phaser.Geom.Rectangle.Contains
     );
 
