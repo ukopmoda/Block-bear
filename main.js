@@ -462,7 +462,7 @@ function createPieceVisual(
     container.setSize(width, height);
 
     container.setInteractive(
-        new Phaser.Geom.Rectangle(-165, -165, 330, 330),
+        new Phaser.Geom.Rectangle(-185, -185, 370, 370),
         Phaser.Geom.Rectangle.Contains
     );
 
