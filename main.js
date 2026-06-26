@@ -1,5 +1,5 @@
 const _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _TOUCH_LIFT     = 310;  // logical units piece rides above finger on touch
+const _TOUCH_LIFT     = 270;  // logical units piece rides above finger on touch
 
 let score = 0;
 let scoreText;
@@ -202,18 +202,34 @@ class GameScene extends Phaser.Scene {
                 if (gameOver || piece.disabledForFit) return;
 
                 piece.setDepth(1000);
+                piece.x = pointer.x;
+                piece.y = pointer.y;
+                piece._dragPX = pointer.x;
+                piece._dragPY = pointer.y;
 
-                // Tween piece from tray position up to lifted spot + full scale.
-                // drag handler kills this tween the moment the pointer moves.
+                // Scale up smoothly
                 this.tweens.killTweensOf(piece);
                 this.tweens.add({
                     targets: piece,
-                    x: pointer.x,
-                    y: pointer.y - _TOUCH_LIFT,
                     scaleX: 1,
                     scaleY: 1,
-                    duration: 160,
+                    duration: 140,
+                    ease: 'Back.Out',
+                });
+
+                // Tween the LIFT OFFSET separately so position always tracks finger
+                const liftProxy = { lift: 0 };
+                piece._liftProxy = liftProxy;
+                this.tweens.add({
+                    targets: liftProxy,
+                    lift: _TOUCH_LIFT,
+                    duration: 220,
                     ease: 'Cubic.Out',
+                    onUpdate: () => {
+                        piece.x = piece._dragPX;
+                        piece.y = piece._dragPY - liftProxy.lift;
+                    },
+                    onComplete: () => { piece._liftProxy = null; },
                 });
             }
         );
@@ -222,16 +238,15 @@ class GameScene extends Phaser.Scene {
             "drag",
             (pointer, piece, dragX, dragY) => {
 
-                if (gameOver) return;
+                if (gameOver || piece.disabledForFit) return;
 
-                if (piece.disabledForFit) return;
+                piece._dragPX = pointer.x;
+                piece._dragPY = pointer.y;
 
-                // Kill pickup tween the moment pointer moves, then track directly
-                this.tweens.killTweensOf(piece);
-                piece.scaleX = 1;
-                piece.scaleY = 1;
-                piece.x = pointer.x;
-                piece.y = pointer.y - _TOUCH_LIFT;
+                if (!piece._liftProxy) {
+                    piece.x = pointer.x;
+                    piece.y = pointer.y - _TOUCH_LIFT;
+                }
 
                 drawGhost(piece);
             }
@@ -244,6 +259,11 @@ class GameScene extends Phaser.Scene {
                 if (gameOver) return;
 
                 if (piece.disabledForFit) return;
+
+                if (piece._liftProxy) {
+                    this.tweens.killTweensOf(piece._liftProxy);
+                    piece._liftProxy = null;
+                }
 
                 ghostGraphics.clear();
 
