@@ -1,5 +1,5 @@
 const _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _TOUCH_LIFT     = 230;  // logical units piece rides above finger on touch
+const _TOUCH_LIFT     = 310;  // logical units piece rides above finger on touch
 
 let score = 0;
 let scoreText;
@@ -351,7 +351,7 @@ function createHand() {
 
     handPieces = [];
 
-    const trayY = 850;
+    const trayY = 890;
 
     const trayPositions = [134, 320, 506];
 
@@ -432,12 +432,12 @@ function createPieceVisual(
     container.startX = startX;
     container.startY = startY;
 
-    container.setScale(0.55);
+    container.setScale(0.45);
 
     container.setSize(width, height);
 
     container.setInteractive(
-        new Phaser.Geom.Rectangle(-160, -160, 320, 320),
+        new Phaser.Geom.Rectangle(-130, -130, 260, 260),
         Phaser.Geom.Rectangle.Contains
     );
 
@@ -811,8 +811,8 @@ function tryPlacePiece(piece) {
             targets: piece,
             x: piece.startX,
             y: piece.startY,
-            scaleX: 0.55,
-            scaleY: 0.55,
+            scaleX: 0.45,
+            scaleY: 0.45,
             duration: 180,
             ease: 'Back.Out'
         });
