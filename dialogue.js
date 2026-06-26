@@ -9,9 +9,17 @@ function _ensureAudioCtx() {
     return _audioCtx;
 }
 
-// iOS suspends AudioContext until a user gesture — unlock on first touch
+// iOS suspends AudioContext until a user gesture — play a silent buffer to fully unlock
 document.addEventListener('touchstart', function _iosAudioUnlock() {
-    _ensureAudioCtx();
+    try {
+        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (_audioCtx.state === 'suspended') _audioCtx.resume();
+        const buf = _audioCtx.createBuffer(1, 1, 22050);
+        const src = _audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(_audioCtx.destination);
+        src.start(0);
+    } catch(e) {}
 }, { passive: true });
 
 function _sansBlip() {

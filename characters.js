@@ -115,9 +115,7 @@ function getCurrentBearSkin() {
 }
 
 function getUnlockedBoards() {
-    const saved = localStorage.getItem('blockPuzzle_unlockedBoards');
-    if (!saved) return ['classic'];
-    try { return JSON.parse(saved); } catch (e) { return ['classic']; }
+    return Object.keys(SKINS);
 }
 
 // Always returns a bear — backwards compatible with character3d.js and dialogue.js

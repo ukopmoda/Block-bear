@@ -202,32 +202,35 @@ class GameScene extends Phaser.Scene {
                 if (gameOver || piece.disabledForFit) return;
 
                 piece.setDepth(1000);
-                piece.x = pointer.x;
-                piece.y = pointer.y;
                 piece._dragPX = pointer.x;
                 piece._dragPY = pointer.y;
 
-                // Scale up smoothly
+                const startX = piece.x;
+                const startY = piece.y;
+
+                // Scale up smoothly, no bounce
                 this.tweens.killTweensOf(piece);
                 this.tweens.add({
                     targets: piece,
                     scaleX: 1,
                     scaleY: 1,
-                    duration: 140,
-                    ease: 'Back.Out',
+                    duration: 180,
+                    ease: 'Quad.Out',
                 });
 
-                // Tween the LIFT OFFSET separately so position always tracks finger
-                const liftProxy = { lift: 0 };
-                piece._liftProxy = liftProxy;
+                // Glide from tray position to above finger — no snap, fully smooth
+                const proxy = { t: 0 };
+                piece._liftProxy = proxy;
                 this.tweens.add({
-                    targets: liftProxy,
-                    lift: _TOUCH_LIFT,
-                    duration: 220,
+                    targets: proxy,
+                    t: 1,
+                    duration: 240,
                     ease: 'Cubic.Out',
                     onUpdate: () => {
-                        piece.x = piece._dragPX;
-                        piece.y = piece._dragPY - liftProxy.lift;
+                        const tx = piece._dragPX;
+                        const ty = piece._dragPY - _TOUCH_LIFT;
+                        piece.x = startX + (tx - startX) * proxy.t;
+                        piece.y = startY + (ty - startY) * proxy.t;
                     },
                     onComplete: () => { piece._liftProxy = null; },
                 });
@@ -457,7 +460,7 @@ function createPieceVisual(
     container.setSize(width, height);
 
     container.setInteractive(
-        new Phaser.Geom.Rectangle(-130, -130, 260, 260),
+        new Phaser.Geom.Rectangle(-165, -165, 330, 330),
         Phaser.Geom.Rectangle.Contains
     );
 
