@@ -38,11 +38,11 @@ const BEAR_SKINS = {
 };
 
 const BEAVER_SKIN = {
-    bodyColor:   0x4a3010,   // dark muted brown
-    accentColor: 0x7a5830,   // medium warm brown (used for snout/teeth/tail)
-    spotColor:   0x180a02,
-    eyeColor:    0x120804,
-    nameColor:   '#6a4820',
+    bodyColor:   0x5c5c5c,
+    accentColor: 0x888888,
+    spotColor:   0x1c1c1c,
+    eyeColor:    0x080808,
+    nameColor:   '#909090',
 };
 
 const BEAVER_DIALOGUES = {

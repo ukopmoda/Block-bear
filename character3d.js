@@ -496,15 +496,31 @@ function _build(def) {
         head.add(noseMesh);
     }
 
-    // Eyes — shared by both animals
-    [[-0.46, 1], [0.46, -1]].forEach(([ex, side]) => {
-        const eye = new T.Mesh(new T.SphereGeometry(0.17, 10, 8), eyeMat);
-        eye.position.set(ex, 0.20, 0.76);
-        head.add(eye);
-        const shine = new T.Mesh(new T.SphereGeometry(0.09, 8, 6), shineMat);
-        shine.position.set(ex + 0.04 * side, 0.27, 0.88);
-        head.add(shine);
-    });
+    if (def.animal === 'beaver') {
+        // Beady eyes sunk into the sides of the head
+        [[-0.76, 1], [0.76, -1]].forEach(([ex, side]) => {
+            const socket = new T.Mesh(new T.SphereGeometry(0.22, 8, 6), darkMat);
+            socket.scale.set(0.80, 0.80, 0.28);
+            socket.position.set(ex, 0.10, 0.57);
+            head.add(socket);
+            const eye = new T.Mesh(new T.SphereGeometry(0.13, 10, 8), eyeMat);
+            eye.position.set(ex, 0.10, 0.62);
+            head.add(eye);
+            const shine = new T.Mesh(new T.SphereGeometry(0.055, 8, 6), shineMat);
+            shine.position.set(ex + 0.03 * side, 0.15, 0.70);
+            head.add(shine);
+        });
+    } else {
+        // Bear eyes — front-facing
+        [[-0.46, 1], [0.46, -1]].forEach(([ex, side]) => {
+            const eye = new T.Mesh(new T.SphereGeometry(0.17, 10, 8), eyeMat);
+            eye.position.set(ex, 0.20, 0.76);
+            head.add(eye);
+            const shine = new T.Mesh(new T.SphereGeometry(0.09, 8, 6), shineMat);
+            shine.position.set(ex + 0.04 * side, 0.27, 0.88);
+            head.add(shine);
+        });
+    }
 
     grp.add(head);
 
