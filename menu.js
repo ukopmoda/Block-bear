@@ -170,7 +170,7 @@ class MenuScene extends Phaser.Scene {
         passwordPanel.setVisible(false);
 
         // PLAY — large, dominant
-        this._makePlayButton(cx, 672, () => {
+        this._makePlayButton(cx, 648, () => {
             if (typeof menuBearNod  === 'function') menuBearNod();
             if (typeof menuBearZoom === 'function') menuBearZoom();
             const flash = document.createElement('div');
@@ -181,13 +181,16 @@ class MenuScene extends Phaser.Scene {
             setTimeout(() => this.scene.start('GameScene'), 480);
         });
 
-        // SKINS | CODE side by side
-        this._makeButton(cx - 148, 780, 'SKINS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); skinsPanel.setVisible(true); });
-        this._makeButton(cx + 148, 780, 'CODE',  () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); passwordPanel.open(); });
+        // STUDY
+        this._makeButton(cx, 728, 'STUDY', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); openStudyOverlay(this); });
 
-        // SETTINGS | LORE smaller below
-        this._makeSmallButton(cx - 110, 860, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
-        this._makeSmallButton(cx + 110, 860, '???', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
+        // SKINS | CODE side by side
+        this._makeButton(cx - 148, 808, 'SKINS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); skinsPanel.setVisible(true); });
+        this._makeButton(cx + 148, 808, 'CODE',  () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); passwordPanel.open(); });
+
+        // SETTINGS | ??? smaller below
+        this._makeSmallButton(cx - 110, 882, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
+        this._makeSmallButton(cx + 110, 882, '???', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
 
         this.add.text(cx, H - 28, 'v0.173', {
             fontSize: '14px',
