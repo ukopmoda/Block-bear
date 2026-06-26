@@ -371,12 +371,14 @@ function _build(def) {
     torsoMesh.position.set(0, 2.3, 0);
     ol(torsoMesh, 1.05);
     torsoGrp.add(torsoMesh);
-    // Oval belly patch
-    const bellyMat = lm(def.accentColor);
-    const belly = new T.Mesh(new T.SphereGeometry(0.65, 16, 12), bellyMat);
-    belly.scale.set(0.82, 1.02, 0.22);
-    belly.position.set(0, 0.02, 0.74);
-    torsoMesh.add(belly);
+    // Oval belly patch — bear only
+    if (def.animal !== 'beaver') {
+        const bellyMat = lm(def.accentColor);
+        const belly = new T.Mesh(new T.SphereGeometry(0.65, 16, 12), bellyMat);
+        belly.scale.set(0.82, 1.02, 0.22);
+        belly.position.set(0, 0.02, 0.74);
+        torsoMesh.add(belly);
+    }
     grp.add(torsoGrp);
 
     // ── TAIL ─────────────────────────────────────────────────────────────────

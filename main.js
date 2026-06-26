@@ -270,6 +270,10 @@ class GameScene extends Phaser.Scene {
                     piece._liftProxy = null;
                 }
 
+                // Pin to exact finger-release position so snap matches where ghost was shown
+                piece.x = pointer.x;
+                piece.y = pointer.y - _TOUCH_LIFT;
+
                 ghostGraphics.clear();
 
                 // Restore piece squares and any lit board cells on release
