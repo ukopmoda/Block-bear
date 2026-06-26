@@ -1,5 +1,5 @@
 const _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _TOUCH_LIFT     = 235;  // logical units piece rides above finger on touch
+const _TOUCH_LIFT     = 210;  // logical units piece rides above finger on touch
 
 let score = 0;
 let scoreText;
