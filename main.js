@@ -226,6 +226,8 @@ class GameScene extends Phaser.Scene {
 
                 // Kill pickup tween the moment pointer moves, then track directly
                 this.tweens.killTweensOf(piece);
+                piece.scaleX = 1;
+                piece.scaleY = 1;
                 piece.x = pointer.x;
                 piece.y = pointer.y - _TOUCH_LIFT;
 
@@ -428,12 +430,12 @@ function createPieceVisual(
     container.startX = startX;
     container.startY = startY;
 
-    container.setScale(0.45);
+    container.setScale(0.55);
 
     container.setSize(width, height);
 
     container.setInteractive(
-        new Phaser.Geom.Rectangle(-150, -150, 300, 300),
+        new Phaser.Geom.Rectangle(-220, -220, 440, 440),
         Phaser.Geom.Rectangle.Contains
     );
 
@@ -807,8 +809,8 @@ function tryPlacePiece(piece) {
             targets: piece,
             x: piece.startX,
             y: piece.startY,
-            scaleX: 0.45,
-            scaleY: 0.45,
+            scaleX: 0.55,
+            scaleY: 0.55,
             duration: 180,
             ease: 'Back.Out'
         });

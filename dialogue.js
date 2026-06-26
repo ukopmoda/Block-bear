@@ -1,10 +1,22 @@
 let dialogueActive = false;
 
 let _audioCtx = null;
+let _oceanLoaded = false;
+
+function _ensureAudioCtx() {
+    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    return _audioCtx;
+}
+
+// iOS suspends AudioContext until a user gesture — unlock on first touch
+document.addEventListener('touchstart', function _iosAudioUnlock() {
+    _ensureAudioCtx();
+}, { passive: true });
+
 function _sansBlip() {
     try {
-        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const ctx = _audioCtx;
+        const ctx = _ensureAudioCtx();
         const osc = ctx.createOscillator();
         const g   = ctx.createGain();
         osc.connect(g); g.connect(ctx.destination);
@@ -39,8 +51,7 @@ const _jaLines = [
 
 function playPlaceSound() {
     try {
-        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const ctx = _audioCtx;
+        const ctx = _ensureAudioCtx();
         const now = ctx.currentTime;
         // Low woody thud
         const o1 = ctx.createOscillator(), g1 = ctx.createGain();
@@ -627,16 +638,16 @@ function _clearSoundKpop(ctx) {
 
 function playClearSound() {
     try {
-        if (!_audioCtx) {
-            _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const ctx = _ensureAudioCtx();
+        if (!_oceanLoaded) {
             // Kick off all sample loads immediately so first clear of each skin uses real audio
-            _oceanLoad(_audioCtx);
-            _kpopLoad(_audioCtx);
-            _kpopHypeLoad(_audioCtx);
-            _forestLoad(_audioCtx);
-            _candyLoad(_audioCtx);
+            _oceanLoad(ctx);
+            _kpopLoad(ctx);
+            _kpopHypeLoad(ctx);
+            _forestLoad(ctx);
+            _candyLoad(ctx);
+            _oceanLoaded = true;
         }
-        const ctx = _audioCtx;
         const skin = typeof currentSkin !== 'undefined' ? currentSkin : 'classic';
         switch (skin) {
             case 'ocean':  _clearSoundOcean(ctx);  break;

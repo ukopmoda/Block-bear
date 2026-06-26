@@ -3,7 +3,7 @@ const CELL_SIZE = 66;
 const BOARD_SIZE = CELL_SIZE * 9;
 
 const START_X = 23;
-const START_Y = 90;
+const START_Y = 120;
 
 let boardGraphics;
 
