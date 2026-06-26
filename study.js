@@ -98,7 +98,7 @@ function openStudyOverlay(scene) {
 
     const el = document.createElement('div');
     el.style.cssText =
-        'position:fixed;inset:0;z-index:200;background:#080604;' +
+        'position:fixed;inset:0;z-index:200;background:#18110a;' +
         'display:flex;flex-direction:column;align-items:center;' +
         'font-family:"Courier New",Courier,monospace;pointer-events:auto;' +
         'box-sizing:border-box;';
@@ -233,10 +233,15 @@ function openStudyOverlay(scene) {
             rv.innerHTML =
                 '<div style="color:#c8b89a;font-size:22px;text-align:center;max-width:380px;line-height:1.5;margin-bottom:20px;">' + answer + '</div>' +
                 (ex_ru
-                    ? '<div style="color:#7a5a38;font-size:13px;text-align:center;max-width:340px;margin-bottom:8px;line-height:1.6;font-style:italic;">' + ex_ru + '</div>' +
+                    ? '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;max-width:340px;justify-content:center;">' +
+                        '<span style="color:#7a5a38;font-size:13px;line-height:1.6;font-style:italic;text-align:center;">' + ex_ru + '</span>' +
+                        '<button id="s-ex-audio" style="background:none;border:none;color:#5a4535;font-size:18px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0;" title="pronounce sentence">🔊</button>' +
+                      '</div>' +
                       '<div style="color:#4a3520;font-size:12px;text-align:center;max-width:340px;line-height:1.6;">' + ex_en + '</div>'
                     : '');
             rv.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+            const exAudioBtn = el.querySelector('#s-ex-audio');
+            if (exAudioBtn) exAudioBtn.onclick = (e) => { e.stopPropagation(); _speakRussian(ex_ru); };
 
             const btns = el.querySelector('#s-btns');
             btns.style.opacity = '1';

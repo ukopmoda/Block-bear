@@ -194,7 +194,7 @@ class MenuScene extends Phaser.Scene {
         this._makeSmallButton(cx - 110, 882, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
         this._makeSmallButton(cx + 110, 882, '???', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
 
-        this.add.text(cx, H - 28, 'v0.178', {
+        this.add.text(cx, H - 28, 'v0.179', {
             fontSize: '14px',
             color: '#3d2b1f',
         }).setOrigin(0.5);
