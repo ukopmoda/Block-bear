@@ -40,6 +40,7 @@ let _frameCount = 0;
 let _randomDialogueNextT = 55;
 let _shineMat        = null;
 let _dialogueTriggerT = -99;
+let _lastBuiltAnimal = null;
 
 // Menu mode state
 let _menuMode        = false;
@@ -54,7 +55,7 @@ let _bfWingR         = null;
 // ── Public API ────────────────────────────────────────────────────────────────
 
 function show3DCharacter() {
-    if (!_r) _init();
+    _ensureInit();
     if (_raf) { cancelAnimationFrame(_raf); _raf = null; }
 
     _menuMode = false;
@@ -92,7 +93,7 @@ function notifyBearDialogue() {
 }
 
 function showMenuBear() {
-    if (!_r) _init();
+    _ensureInit();
     if (_raf) { cancelAnimationFrame(_raf); _raf = null; }
 
     _menuMode = true;
@@ -287,6 +288,43 @@ function _init() {
         if (_menuMode) _positionMenu(); else _position();
         _repositionBanner();
     });
+    _lastBuiltAnimal = (getAdminCharacter() || {}).animal || 'bear';
+}
+
+function _ensureInit() {
+    const animal = (getAdminCharacter() || {}).animal || 'bear';
+    if (!_r) { _init(); return; }
+    if (_lastBuiltAnimal === animal) return;
+    // Character type changed — rebuild geometry, reuse renderer/scene/camera/lights
+    _mats.forEach(m => { try { m.dispose(); } catch(e) {} });
+    if (_grp) _s.remove(_grp);
+    const character = getAdminCharacter();
+    const def = {
+        animal:      character?.animal      || 'bear',
+        bodyColor:   character?.bodyColor   || 0xc8801a,
+        accentColor: character?.accentColor || 0xe8c070,
+        spotColor:   character?.spotColor   || 0x4a1e06,
+        eyeColor:    character?.eyeColor    || 0xffd84a,
+    };
+    const built = _build(def);
+    _grp       = built.grp;
+    _head      = built.head;
+    _torso     = built.torso;
+    _neck      = built.neck;
+    _tail      = built.tail;
+    _armL      = built.armL;
+    _armR      = built.armR;
+    _legL      = built.legL;
+    _legR      = built.legR;
+    _flowers   = built.flowers;
+    _butterfly = built.butterfly;
+    _bfWingL   = built.bfWingL;
+    _bfWingR   = built.bfWingR;
+    _mats      = built.mats;
+    _shineMat  = built.shineMat;
+    _tablet    = built.tablet;
+    _s.add(_grp);
+    _lastBuiltAnimal = animal;
 }
 
 function _build(def) {
@@ -343,13 +381,31 @@ function _build(def) {
 
     // ── TAIL ─────────────────────────────────────────────────────────────────
     const tailGrp = new T.Group();
-    tailGrp.position.set(0, 2.0, -0.74);
-    const tailStem = new T.Mesh(new T.CylinderGeometry(0.055, 0.04, 0.85, 8), bodyMat);
-    tailStem.position.set(0, -0.42, 0);
-    tailGrp.add(tailStem);
-    const tailTuft = new T.Mesh(new T.SphereGeometry(0.14, 8, 6), spotMat);
-    tailTuft.position.set(0, -0.90, 0);
-    tailGrp.add(tailTuft);
+    if (def.animal === 'beaver') {
+        // Flat paddle tail — wide, oval, positioned low at the back
+        tailGrp.position.set(0.3, 0.9, -0.9);
+        tailGrp.rotation.y = -0.28;
+        const paddleMat = lm(def.accentColor);
+        const paddle = new T.Mesh(new T.BoxGeometry(1.8, 0.13, 2.0), paddleMat);
+        paddle.rotation.x = -0.14;
+        ol(paddle, 1.04);
+        // Scale-plate texture strips
+        for (let i = 0; i < 5; i++) {
+            const strip = new T.Mesh(new T.BoxGeometry(1.74, 0.025, 0.06), spotMat);
+            strip.position.set(0, 0.08, -0.75 + i * 0.38);
+            paddle.add(strip);
+        }
+        tailGrp.add(paddle);
+    } else {
+        // Bear fluffy tail
+        tailGrp.position.set(0, 2.0, -0.74);
+        const tailStem = new T.Mesh(new T.CylinderGeometry(0.055, 0.04, 0.85, 8), bodyMat);
+        tailStem.position.set(0, -0.42, 0);
+        tailGrp.add(tailStem);
+        const tailTuft = new T.Mesh(new T.SphereGeometry(0.14, 8, 6), spotMat);
+        tailTuft.position.set(0, -0.90, 0);
+        tailGrp.add(tailTuft);
+    }
     grp.add(tailGrp);
 
     // ── ARMS — shoulder-pivot groups ─────────────────────────────────────────
@@ -373,43 +429,72 @@ function _build(def) {
     armR.add(armRMesh);
     grp.add(armR);
 
-    // ── BEAR HEAD ────────────────────────────────────────────────────────────
+    // ── HEAD ─────────────────────────────────────────────────────────────────
     const head = new T.Group();
     head.rotation.order = 'YXZ';
     head.position.set(0, 4.40, 0.04);
 
-    // Main head — sphere, slightly compressed depth
+    // Main head — sphere, slightly compressed depth (shared)
     const headMesh = new T.Mesh(new T.SphereGeometry(1.20, 16, 12), bodyMat);
     headMesh.scale.set(1.0, 0.97, 0.90);
     ol(headMesh, 1.05);
     head.add(headMesh);
 
-    // Round ears — spheres on top-sides
-    [[-0.92], [0.92]].forEach(([ex]) => {
-        const ear = new T.Mesh(new T.SphereGeometry(0.37, 10, 8), bodyMat);
-        ear.scale.set(1.0, 0.93, 0.74);
-        ear.position.set(ex, 0.76, -0.24);
-        ol(ear, 1.06);
-        head.add(ear);
-        const earIn = new T.Mesh(new T.SphereGeometry(0.20, 8, 6), darkMat);
-        earIn.scale.set(0.90, 0.86, 0.50);
-        earIn.position.set(ex, 0.76, -0.14);
-        head.add(earIn);
-    });
+    if (def.animal === 'beaver') {
+        // Beaver: small flat disc ears, wide snout, buck teeth
+        [[-0.88], [0.88]].forEach(([ex]) => {
+            const ear = new T.Mesh(new T.SphereGeometry(0.22, 10, 8), bodyMat);
+            ear.scale.set(1.0, 0.85, 0.40);
+            ear.position.set(ex, 0.64, 0.04);
+            ol(ear, 1.06);
+            head.add(ear);
+            const earIn = new T.Mesh(new T.SphereGeometry(0.13, 8, 6), darkMat);
+            earIn.scale.set(0.90, 0.80, 0.50);
+            earIn.position.set(ex, 0.64, 0.13);
+            head.add(earIn);
+        });
+        // Wider, flatter snout
+        const snout = new T.Mesh(new T.BoxGeometry(0.86, 0.46, 0.54), accentMat);
+        snout.position.set(0, -0.18, 0.89);
+        ol(snout, 1.05);
+        head.add(snout);
+        // Nose — wider
+        const noseMesh = new T.Mesh(new T.SphereGeometry(0.15, 8, 6), darkMat);
+        noseMesh.scale.set(1.30, 0.72, 0.65);
+        noseMesh.position.set(0, 0.06, 1.10);
+        head.add(noseMesh);
+        // Buck teeth — two cream rectangles below the snout
+        const toothMat = lm(0xf2e8c0);
+        [-0.20, 0.20].forEach(tx => {
+            const tooth = new T.Mesh(new T.BoxGeometry(0.26, 0.38, 0.14), toothMat);
+            tooth.position.set(tx, -0.32, 1.06);
+            ol(tooth, 1.04);
+            head.add(tooth);
+        });
+    } else {
+        // Bear: round ears, snout, nose
+        [[-0.92], [0.92]].forEach(([ex]) => {
+            const ear = new T.Mesh(new T.SphereGeometry(0.37, 10, 8), bodyMat);
+            ear.scale.set(1.0, 0.93, 0.74);
+            ear.position.set(ex, 0.76, -0.24);
+            ol(ear, 1.06);
+            head.add(ear);
+            const earIn = new T.Mesh(new T.SphereGeometry(0.20, 8, 6), darkMat);
+            earIn.scale.set(0.90, 0.86, 0.50);
+            earIn.position.set(ex, 0.76, -0.14);
+            head.add(earIn);
+        });
+        const snout = new T.Mesh(new T.BoxGeometry(0.74, 0.50, 0.50), accentMat);
+        snout.position.set(0, -0.15, 0.90);
+        ol(snout, 1.05);
+        head.add(snout);
+        const noseMesh = new T.Mesh(new T.SphereGeometry(0.17, 8, 6), darkMat);
+        noseMesh.scale.set(1.10, 0.72, 0.65);
+        noseMesh.position.set(0, 0.05, 1.10);
+        head.add(noseMesh);
+    }
 
-    // Bear snout — rounded box on front of sphere
-    const snout = new T.Mesh(new T.BoxGeometry(0.74, 0.50, 0.50), accentMat);
-    snout.position.set(0, -0.15, 0.90);
-    ol(snout, 1.05);
-    head.add(snout);
-
-    // Nose
-    const noseMesh = new T.Mesh(new T.SphereGeometry(0.17, 8, 6), darkMat);
-    noseMesh.scale.set(1.10, 0.72, 0.65);
-    noseMesh.position.set(0, 0.05, 1.10);
-    head.add(noseMesh);
-
-    // Eyes — white sclera + black pupil
+    // Eyes — shared by both animals
     [[-0.46, 1], [0.46, -1]].forEach(([ex, side]) => {
         const eye = new T.Mesh(new T.SphereGeometry(0.17, 10, 8), eyeMat);
         eye.position.set(ex, 0.20, 0.76);
@@ -836,10 +921,17 @@ function _loop() {
         _torso.position.y = breathe * 0.5;
     }
 
-    // ── Tail wag ──────────────────────────────────────────────────────────────
+    // ── Tail ─────────────────────────────────────────────────────────────────
     if (_tail) {
-        _tail.rotation.x = 0.30 + Math.sin(t * 2.18) * 0.24 + Math.sin(t * 1.43) * 0.09;
-        _tail.rotation.z = Math.sin(t * 1.76) * 0.16;
+        if (_lastBuiltAnimal === 'beaver') {
+            // Slow side-to-side thwack
+            _tail.rotation.x = -0.14 + Math.sin(t * 1.1) * 0.07;
+            _tail.rotation.z = Math.sin(t * 0.85) * 0.20;
+            _tail.rotation.y = -0.28 + Math.sin(t * 0.65) * 0.10;
+        } else {
+            _tail.rotation.x = 0.30 + Math.sin(t * 2.18) * 0.24 + Math.sin(t * 1.43) * 0.09;
+            _tail.rotation.z = Math.sin(t * 1.76) * 0.16;
+        }
     }
 
     // ── Arms — idle pendulum + lateral drift; climb overrides ───────────────

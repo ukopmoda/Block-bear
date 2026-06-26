@@ -169,6 +169,7 @@ class MenuScene extends Phaser.Scene {
                   const code = inputStr.trim().toUpperCase();
                   const matched = UNLOCK_CODES[code];
                   if (matched) {
+                      if (matched.character) localStorage.setItem('blockPuzzle_character', matched.character);
                       localStorage.setItem('blockPuzzle_bearSkin', matched.bearSkin);
                       localStorage.setItem('blockPuzzle_unlockedBoards', JSON.stringify(matched.boards));
                       feedbackTxt.setText('unlocked!').setColor('#4a9b4a');

@@ -37,6 +37,57 @@ const BEAR_SKINS = {
     },
 };
 
+const BEAVER_SKIN = {
+    bodyColor:   0x6a4420,
+    accentColor: 0xa87848,
+    spotColor:   0x241208,
+    eyeColor:    0x1a0c02,
+    nameColor:   '#7a5428',
+};
+
+const BEAVER_DIALOGUES = {
+    bigCombo: [
+        "suboptimal placement, but the outcome was statistically acceptable.",
+        "cleared. efficiency rating: 7.2 out of 10.",
+        "that combo had good throughput.",
+        "your pattern recognition is improving. marginally.",
+        "optimal outcome. suboptimal process. still counts.",
+        "well-executed. i'd have used fewer pieces but fine.",
+        "7 cells cleared. above baseline.",
+        "the board approved that move. i am neutral.",
+    ],
+    bigStreak: [
+        "consistent output. running above baseline.",
+        "streak confirmed. the algorithm is satisfied.",
+        "four consecutive clears. don't break the chain.",
+        "you've achieved a local maximum. stay focused.",
+        "this is what planning ahead looks like.",
+        "your decision tree is improving. incrementally.",
+    ],
+    danger: [
+        "your board is approaching a deadlock state.",
+        "you've painted yourself into a corner. classically.",
+        "this is what happens when you don't plan ahead.",
+        "stack overflow. in real life.",
+        "board entropy is critical. intervene immediately.",
+        "i'd help but you need to learn from this.",
+        "your spatial reasoning has failed. diagnose and retry.",
+        "fatal error incoming. prepare for game over.",
+    ],
+    gameOver: [
+        "process terminated.",
+        "fatal error: no valid moves remaining.",
+        "segmentation fault. core dumped.",
+        "your strategy had an O(n²) problem. this is the result.",
+        "null pointer exception. board is now empty.",
+        "runtime terminated. exit code 1.",
+        "git blame yourself.",
+        "404: winning not found.",
+        "you failed to allocate sufficient space. classic.",
+        "that was a memory leak. you were the memory.",
+    ],
+};
+
 // Shared dialogue lines — same bear personality across all skins
 const BEAR_DIALOGUES = {
     bigCombo: [
@@ -86,8 +137,9 @@ const BEAR_DIALOGUES = {
 // Classic board is always available to everyone (no code needed).
 // Add a new entry here for each person you want to give access to.
 const UNLOCK_CODES = {
-    'UKAPOKU': { bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
-    // 'PERSONCODE': { bearSkin: 'glacier', boards: ['classic', 'ocean'] },
+    'UKAPOKU': { character: 'bear',   bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
+    'BUILDMODE': { character: 'beaver', bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
+    // 'PERSONCODE': { character: 'bear', bearSkin: 'glacier', boards: ['classic', 'ocean'] },
 };
 
 function getCurrentBearSkin() {
@@ -99,8 +151,19 @@ function getUnlockedBoards() {
     return Object.keys(SKINS);
 }
 
-// Always returns a bear — backwards compatible with character3d.js and dialogue.js
 function getAdminCharacter() {
+    const charType = localStorage.getItem('blockPuzzle_character') || 'bear';
+    if (charType === 'beaver') {
+        return {
+            animal:      'beaver',
+            bodyColor:   BEAVER_SKIN.bodyColor,
+            accentColor: BEAVER_SKIN.accentColor,
+            spotColor:   BEAVER_SKIN.spotColor,
+            eyeColor:    BEAVER_SKIN.eyeColor,
+            nameColor:   BEAVER_SKIN.nameColor,
+            dialogues:   BEAVER_DIALOGUES,
+        };
+    }
     const skin = getCurrentBearSkin();
     return {
         animal:      'bear',
