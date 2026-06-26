@@ -74,6 +74,16 @@ const BEAVER_DIALOGUES = {
         "your spatial reasoning has failed. diagnose and retry.",
         "fatal error incoming. prepare for game over.",
     ],
+    badPlacement: [
+        "you just isolated a cell. that space is gone forever.",
+        "dead zone created. suboptimal.",
+        "that gap is now unreachable. congratulations.",
+        "you boxed in an empty cell. why.",
+        "efficiency: negative. new dead cell detected.",
+        "i ran the simulation. that hole cannot be filled.",
+        "classic mistake. unfillable gap.",
+        "you've permanently wasted a cell. noted.",
+    ],
     gameOver: [
         "process terminated.",
         "fatal error: no valid moves remaining.",

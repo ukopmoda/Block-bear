@@ -307,7 +307,25 @@ function getTodayDateString() {
     return year + "-" + month + "-" + day;
 }
 
-let _dangerDialogueLast = -99999;
+let _dangerDialogueLast    = -99999;
+let _badPlacementLast      = -99999;
+
+// Counts empty cells with all 4 neighbours filled — permanently unfillable holes
+function _countIsolatedHoles() {
+    let holes = 0;
+    for (let y = 0; y < 9; y++) {
+        for (let x = 0; x < 9; x++) {
+            if (board[y][x] !== 0) continue;
+            const blocked =
+                (y === 0 || board[y-1][x] !== 0) &&
+                (y === 8 || board[y+1][x] !== 0) &&
+                (x === 0 || board[y][x-1] !== 0) &&
+                (x === 8 || board[y][x+1] !== 0);
+            if (blocked) holes++;
+        }
+    }
+    return holes;
+}
 
 function getBoardFillPct() {
     let filled = 0;
@@ -853,6 +871,8 @@ function tryPlacePiece(piece) {
         return;
     }
 
+    const _holesBefore = _countIsolatedHoles();
+
     placePiece(piece.shape, row, col);
     playPlaceSound();
 
@@ -991,6 +1011,16 @@ function tryPlacePiece(piece) {
             if (now - _dangerDialogueLast > 28000) {
                 _dangerDialogueLast = now;
                 showCharacterDialogue('danger');
+            }
+        }
+
+        // Beaver: call out suboptimal placements that create isolated dead cells
+        const holesAfter = _countIsolatedHoles();
+        if (holesAfter > _holesBefore) {
+            const now = Date.now();
+            if (now - _badPlacementLast > 12000) {
+                _badPlacementLast = now;
+                showCharacterDialogue('badPlacement');
             }
         }
     }
@@ -1175,7 +1205,8 @@ function restartGame() {
     gameOver = false;
     kpopHypeActive    = false;
     kpopLastMilestone = 0;
-    _dangerDialogueLast = -99999;
+    _dangerDialogueLast   = -99999;
+    _badPlacementLast     = -99999;
     if (typeof stopKpopHypeBackground === 'function') stopKpopHypeBackground();
     applyKpopHypeTint(false);
     stopKpopHypeBar();
