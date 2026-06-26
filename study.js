@@ -1,8 +1,9 @@
 // study.js — Anki-style Russian flashcard system
 
-const _SRS_KEY    = 'blockPuzzle_russian_srs';
-const _STREAK_KEY = 'blockPuzzle_russian_streak';
-const _NEW_PER_SESSION = 20;
+const _SRS_KEY       = 'blockPuzzle_russian_srs';
+const _STREAK_KEY    = 'blockPuzzle_russian_streak';
+const _DAILY_NEW_KEY = 'blockPuzzle_russian_daily_new';
+const _NEW_PER_DAY   = 20;
 
 const _INTERVALS = [
     1  * 24 * 3600000,
@@ -28,19 +29,35 @@ function _markAnswer(idx, knew) {
     _saveSRS(data);
 }
 
-function _buildSession() {
-    const data  = _getSRS();
-    const now   = Date.now();
-    const due   = [];
+// Pick (and cache) today's batch of new word indices, in list order.
+function _getDailyNew() {
+    const today = new Date().toISOString().slice(0, 10);
+    try {
+        const d = JSON.parse(localStorage.getItem(_DAILY_NEW_KEY) || 'null');
+        if (d && d.date === today) return d.indices;
+    } catch(e) {}
+    const data = _getSRS();
     const fresh = [];
     RUSSIAN_WORDS.forEach((_, i) => {
         const e = data[i];
-        if (!e || e.level === 0) { fresh.push(i); }
-        else if (e.due <= now)   { due.push(i); }
+        if (!e || e.level === 0) fresh.push(i);
     });
-    const shuffleDue   = due.sort(() => Math.random() - 0.5);
-    const shuffleFresh = fresh.sort(() => Math.random() - 0.5).slice(0, _NEW_PER_SESSION);
-    return [...shuffleDue, ...shuffleFresh];
+    const batch = fresh.slice(0, _NEW_PER_DAY);
+    localStorage.setItem(_DAILY_NEW_KEY, JSON.stringify({ date: today, indices: batch }));
+    return batch;
+}
+
+function _buildSession() {
+    const data = _getSRS();
+    const now  = Date.now();
+    const due  = [];
+    RUSSIAN_WORDS.forEach((_, i) => {
+        const e = data[i];
+        if (e && e.level > 0 && e.due <= now) due.push(i);
+    });
+    // due cards in stable index order, then today's new words (still at level 0)
+    const todayNew = _getDailyNew().filter(i => { const e = data[i]; return !e || e.level === 0; });
+    return [...due, ...todayNew];
 }
 
 // Returns { due, new: newCount, total } for menu badge
@@ -53,7 +70,7 @@ function getStudyDueCount() {
         if (!e || e.level === 0) newCount++;
         else if (e.due <= now)   due++;
     });
-    return { due, new: Math.min(newCount, _NEW_PER_SESSION), total: due + Math.min(newCount, _NEW_PER_SESSION) };
+    return { due, new: Math.min(newCount, _NEW_PER_DAY), total: due + Math.min(newCount, _NEW_PER_DAY) };
 }
 
 // ── Streak ────────────────────────────────────────────────────────────────────
