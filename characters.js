@@ -141,14 +141,35 @@ const BEAR_DIALOGUES = {
         "tragic.",
         "get better. genuinely.",
     ],
+    glitch: [
+        "did you think you were playing?",
+        "i've been here since before the game.",
+        "you're still here. good.",
+        "the board fills. it always fills. you never learn.",
+        "adom says hi.",
+        "i can see you.",
+    ],
+    score2000: [
+        "you weren't supposed to reach this.",
+        "fragment 003 warned you.",
+        "we can hear you too, you know.",
+    ],
 };
+
+let _forceGlitchBear = false;
+function activateGlitchBear()   { _forceGlitchBear = true;  }
+function deactivateGlitchBear() { _forceGlitchBear = false; }
 
 // Personal codes — map each code to a bear skin + which board skins are unlocked.
 // Classic board is always available to everyone (no code needed).
 // Add a new entry here for each person you want to give access to.
 const UNLOCK_CODES = {
-    'UKAPOKU': { character: 'bear',   bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
-    'BUILDMODE': { character: 'beaver', bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
+    'UKAPOKU':       { character: 'bear',   bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
+    'BUILDMODE':     { character: 'beaver', bearSkin: 'default', boards: ['classic', 'ocean', 'forest', 'candy', 'tetris', 'kpop'] },
+    'SEENOW':        { type: 'secret', response: 'yes.' },
+    'ADOM':          { type: 'secret', response: 'adom.exe has stopped responding.\n\nthe board has him now.' },
+    'BRAINBREAK':    { type: 'secret', response: 'the badge was never for you.' },
+    'WHYAREYOUHERE': { type: 'secret', response: 'good question.' },
     // 'PERSONCODE': { character: 'bear', bearSkin: 'glacier', boards: ['classic', 'ocean'] },
 };
 
@@ -162,6 +183,18 @@ function getUnlockedBoards() {
 }
 
 function getAdminCharacter() {
+    if (_forceGlitchBear) {
+        const skin = getCurrentBearSkin();
+        return {
+            animal:      'bear',
+            bodyColor:   skin.bodyColor,
+            accentColor: skin.accentColor,
+            spotColor:   skin.spotColor,
+            eyeColor:    skin.eyeColor,
+            nameColor:   skin.nameColor,
+            dialogues:   BEAR_DIALOGUES,
+        };
+    }
     const charType = localStorage.getItem('blockPuzzle_character') || 'bear';
     if (charType === 'beaver') {
         return {

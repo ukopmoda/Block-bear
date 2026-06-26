@@ -309,6 +309,7 @@ function getTodayDateString() {
 
 let _dangerDialogueLast    = -99999;
 let _badPlacementLast      = -99999;
+let _score2000Triggered    = false;
 
 // Counts empty cells with all 4 neighbours filled — permanently unfillable holes
 function _countIsolatedHoles() {
@@ -967,6 +968,13 @@ function tryPlacePiece(piece) {
 
     scoreText.setText("Score: " + score);
 
+    if (score >= 2000 && !_score2000Triggered) {
+        _score2000Triggered = true;
+        if (typeof triggerBearGlitch === 'function') {
+            triggerBearGlitch(null);
+        }
+    }
+
     // K-Pop hype mode: every 1000 points activates for 40 seconds
     if (currentSkin === 'kpop') {
         if (kpopHypeActive && Date.now() > kpopHypeEndTime) {
@@ -1076,9 +1084,10 @@ function showGameOver() {
 
     gameOver = true;
 
-    // If an admin character is active, show their game-over dialogue first,
-    // then reveal the panel once the player dismisses it.
-    if (getAdminCharacter()) {
+    const shouldGlitch = Math.random() < 0.15;
+    if (shouldGlitch && typeof triggerBearGlitch === 'function') {
+        triggerBearGlitch(_showGameOverPanel);
+    } else if (getAdminCharacter()) {
         showCharacterDialogue('gameOver', _showGameOverPanel);
     } else {
         _showGameOverPanel();
@@ -1207,6 +1216,7 @@ function restartGame() {
     kpopLastMilestone = 0;
     _dangerDialogueLast   = -99999;
     _badPlacementLast     = -99999;
+    _score2000Triggered   = false;
     if (typeof stopKpopHypeBackground === 'function') stopKpopHypeBackground();
     applyKpopHypeTint(false);
     stopKpopHypeBar();

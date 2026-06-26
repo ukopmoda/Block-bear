@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿<!-- if you're reading this: WHYAREYOUHERE -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -133,6 +134,35 @@
             from { clip-path: inset(0 100% 0 0); }
             to   { clip-path: inset(0 0% 0 0); }
         }
+
+        /* Bear glitch — applied to char3d canvas during bear intrusion events */
+        @keyframes bearGlitch {
+            0%   { transform: translate(0,0);    filter: none; }
+            8%   { transform: translate(-5px,2px); filter: saturate(9) hue-rotate(180deg) brightness(1.4); }
+            9%   { transform: translate(0,0);    filter: none; }
+            22%  { transform: translate(6px,-1px); filter: brightness(4) contrast(2) saturate(0); }
+            23%  { transform: translate(0,0);    filter: none; }
+            55%  { transform: translate(-3px,3px); filter: saturate(12) hue-rotate(300deg); }
+            56%  { transform: translate(0,0);    filter: none; }
+            80%  { transform: translate(5px,-2px); filter: hue-rotate(80deg) saturate(7) brightness(1.6); }
+            81%  { transform: translate(0,0);    filter: none; }
+            100% { transform: translate(0,0);    filter: none; }
+        }
+        canvas#char3d.glitching {
+            animation: bearGlitch 0.55s steps(1) 3;
+        }
+
+        /* Lore overlay */
+        #lore-overlay {
+            position: fixed;
+            z-index: 200;
+            background: rgba(0,0,0,0.97);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', Courier, monospace;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body>
@@ -140,14 +170,14 @@
 <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
-<script src="pieces.js?v=171"></script>
-<script src="board.js?v=171"></script>
-<script src="ui.js?v=171"></script>
-<script src="characters.js?v=171"></script>
-<script src="character3d.js?v=171"></script>
-<script src="dialogue.js?v=171"></script>
-<script src="menu.js?v=171"></script>
-<script src="main.js?v=171"></script>
+<script src="pieces.js?v=174"></script>
+<script src="board.js?v=174"></script>
+<script src="ui.js?v=174"></script>
+<script src="characters.js?v=174"></script>
+<script src="character3d.js?v=174"></script>
+<script src="dialogue.js?v=174"></script>
+<script src="menu.js?v=174"></script>
+<script src="main.js?v=174"></script>
 
 <div id="tv-frame"></div>
 <div id="char-badge">the brainbreak</div>

@@ -327,6 +327,23 @@ function _ensureInit() {
     _lastBuiltAnimal = animal;
 }
 
+function triggerBearGlitch(onDone) {
+    if (typeof activateGlitchBear === 'function') activateGlitchBear();
+    _ensureInit();
+    show3DCharacter();
+    const el = _r && _r.domElement;
+    if (el) {
+        el.classList.add('glitching');
+        setTimeout(() => { if (el) el.classList.remove('glitching'); }, 1800);
+    }
+    setTimeout(() => {
+        showCharacterDialogue('glitch', () => {
+            if (typeof deactivateGlitchBear === 'function') deactivateGlitchBear();
+            if (onDone) onDone();
+        });
+    }, 600);
+}
+
 function _build(def) {
     const T    = window.THREE;
     const grp  = new T.Group();

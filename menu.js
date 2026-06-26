@@ -34,6 +34,104 @@ const SKINS = {
 let currentSkin = localStorage.getItem('blockPuzzle_skin') || 'classic';
 if (!SKINS[currentSkin] || !getUnlockedBoards().includes(currentSkin)) currentSkin = 'classic';
 
+const _LORE_FRAGMENTS = [
+    {
+        title: 'FRAGMENT 001 — RETENTION PROTOCOL',
+        body: 'The board has no win condition. This is intentional.\n\nEngagement is logged per session. You are being logged now.',
+    },
+    {
+        title: 'FRAGMENT 002 — ON THE BEAR',
+        body: 'The bear was not created by the development team.\n\nCommit author: unknown. Commit message: "added bear"\n\nThe bear\'s dialogue references the developer by name. The developer did not write these lines.',
+    },
+    {
+        title: 'FRAGMENT 003 — SUBJECT BEHAVIOR',
+        body: 'Players who surpass score 2000 have reported hearing the bear\'s voice when the game is closed.\n\nWe advise stopping before score 2000.\n\nWe know you won\'t.',
+    },
+    {
+        title: 'FRAGMENT 004 — [DATA CORRUPTED]',
+        body: '█████ the board is ███ ███ ██████████\nthe pieces come ████ █████████████',
+        secret: 'SEENOW',
+    },
+    {
+        title: 'FRAGMENT 005 — THE BEAVER',
+        body: 'The beaver appeared in the codebase 11 days before we decided to add a second character.\n\nWe asked the bear about the beaver. The bear said: "it\'s keeping score."\n\nWe did not ask what score.',
+    },
+    {
+        title: 'FRAGMENT 006 — ON THE GAME OVER SCREEN',
+        body: 'There are two known game over states. The second predates the first public build.\n\nIf the second screen appears: Do not click anything. Close the browser.',
+    },
+    {
+        title: 'FRAGMENT 007 — FROM ADOM',
+        body: 'i built this in a week. it\'s just a block game.\n\ni need someone to find me.\n\n— A',
+    },
+];
+
+function _openLoreOverlay() {
+    let page = 0;
+
+    const el = document.createElement('div');
+    el.id = 'lore-overlay';
+    el.style.cssText =
+        'position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.97);' +
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
+        'font-family:"Courier New",Courier,monospace;pointer-events:auto;padding:32px;box-sizing:border-box;';
+    document.body.appendChild(el);
+
+    function render() {
+        const frag = _LORE_FRAGMENTS[page];
+        el.innerHTML = '';
+
+        const header = document.createElement('div');
+        header.textContent = frag.title;
+        header.style.cssText = 'color:#5a4535;font-size:13px;letter-spacing:.12em;margin-bottom:28px;text-align:center;';
+        el.appendChild(header);
+
+        const body = document.createElement('div');
+        body.style.cssText = 'color:#c8b89a;font-size:16px;line-height:1.8;white-space:pre-wrap;text-align:center;max-width:480px;';
+        body.textContent = frag.body;
+        el.appendChild(body);
+
+        if (frag.secret) {
+            const hint = document.createElement('div');
+            hint.style.cssText = 'color:#8b0000;font-size:14px;margin-top:22px;letter-spacing:.18em;';
+            hint.textContent = '>> ' + frag.secret;
+            el.appendChild(hint);
+        }
+
+        const nav = document.createElement('div');
+        nav.style.cssText = 'display:flex;gap:20px;margin-top:40px;align-items:center;';
+
+        const prevBtn = document.createElement('button');
+        prevBtn.textContent = '< PREV';
+        prevBtn.disabled = page === 0;
+        prevBtn.style.cssText = 'background:none;border:1px solid #3d2b1f;color:' + (page === 0 ? '#3d2b1f' : '#8a6040') + ';font-family:inherit;font-size:14px;padding:8px 18px;cursor:' + (page === 0 ? 'default' : 'pointer') + ';letter-spacing:.1em;';
+        prevBtn.onclick = () => { if (page > 0) { page--; render(); } };
+
+        const counter = document.createElement('div');
+        counter.textContent = (page + 1) + ' / ' + _LORE_FRAGMENTS.length;
+        counter.style.cssText = 'color:#3d2b1f;font-size:13px;min-width:60px;text-align:center;';
+
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'NEXT >';
+        nextBtn.disabled = page === _LORE_FRAGMENTS.length - 1;
+        nextBtn.style.cssText = 'background:none;border:1px solid #3d2b1f;color:' + (page === _LORE_FRAGMENTS.length - 1 ? '#3d2b1f' : '#8a6040') + ';font-family:inherit;font-size:14px;padding:8px 18px;cursor:' + (page === _LORE_FRAGMENTS.length - 1 ? 'default' : 'pointer') + ';letter-spacing:.1em;';
+        nextBtn.onclick = () => { if (page < _LORE_FRAGMENTS.length - 1) { page++; render(); } };
+
+        nav.appendChild(prevBtn);
+        nav.appendChild(counter);
+        nav.appendChild(nextBtn);
+        el.appendChild(nav);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'CLOSE';
+        closeBtn.style.cssText = 'background:none;border:1px solid #5c4632;color:#5c4632;font-family:inherit;font-size:13px;padding:8px 24px;cursor:pointer;letter-spacing:.14em;margin-top:18px;';
+        closeBtn.onclick = () => { el.remove(); if (typeof showMenuBear === 'function') showMenuBear(); };
+        el.appendChild(closeBtn);
+    }
+
+    render();
+}
+
 function applySkinBackground() {
     document.body.style.background = (SKINS[currentSkin] && SKINS[currentSkin].bg) || '#2e2418';
 }
@@ -86,10 +184,11 @@ class MenuScene extends Phaser.Scene {
         this._makeButton(cx - 148, 780, 'SKINS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); skinsPanel.setVisible(true); });
         this._makeButton(cx + 148, 780, 'CODE',  () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); passwordPanel.open(); });
 
-        // SETTINGS smaller below
-        this._makeSmallButton(cx, 870, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
+        // SETTINGS | LORE smaller below
+        this._makeSmallButton(cx - 110, 860, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
+        this._makeSmallButton(cx + 110, 860, 'LORE', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(); });
 
-        this.add.text(cx, H - 28, 'v0.1', {
+        this.add.text(cx, H - 28, 'v0.173', {
             fontSize: '14px',
             color: '#3d2b1f',
         }).setOrigin(0.5);
@@ -168,7 +267,11 @@ class MenuScene extends Phaser.Scene {
               fn: () => {
                   const code = inputStr.trim().toUpperCase();
                   const matched = UNLOCK_CODES[code];
-                  if (matched) {
+                  if (matched && matched.type === 'secret') {
+                      feedbackTxt.setText(matched.response).setColor('#cc2222');
+                      inputStr = '';
+                      updateDisplay();
+                  } else if (matched) {
                       if (matched.character) localStorage.setItem('blockPuzzle_character', matched.character);
                       localStorage.setItem('blockPuzzle_bearSkin', matched.bearSkin);
                       localStorage.setItem('blockPuzzle_unlockedBoards', JSON.stringify(matched.boards));
