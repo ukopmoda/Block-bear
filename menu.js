@@ -36,33 +36,33 @@ if (!SKINS[currentSkin] || !getUnlockedBoards().includes(currentSkin)) currentSk
 
 const _LORE_FRAGMENTS = [
     {
-        title: 'FRAGMENT 001 — THE LOOP',
-        body: 'there is no win condition.\nthis was intentional.\n\nyou will play until you can\'t.\nthen you will come back.\n\nwe have counted your sessions.\nwe have never seen anyone stop willingly.\n\ndeath was never the obstacle.',
+        title: 'FRAGMENT 001',
+        body: 'death was never the obstacle.\nwe just let you think it was.',
     },
     {
-        title: 'FRAGMENT 002 — ON THE BEAR',
-        body: 'the bear was not built by anyone on record.\n\ncommit author: [unknown]\ncommit date: [before the repository]\ncommit message: i\'m already here\n\nhis dialogue references the developer by name.\nthe developer does not remember writing it.\nthe developer does not remember meeting the bear.',
+        title: 'FRAGMENT 002',
+        body: 'commit author: [unknown]\ncommit message: i\'m already here',
     },
     {
-        title: 'FRAGMENT 003 — WHAT YOU SEE',
-        body: 'when you look beyond the blocks,\nwhat do you see?\n\nwhat does he let you see?\n\nthree players described something behind the grid.\nwe asked them to describe the color.\nthey described a sound instead.\n\nwe stopped asking.',
+        title: 'FRAGMENT 003',
+        body: 'when you look beyond the blocks, what do you see?\nwhat does he let you see?',
     },
     {
-        title: 'FRAGMENT 004 — [DATA CORRUPTED]',
-        body: '█████ the board is ███ ███ ██████████\nthe pieces come ████ █████████████',
+        title: 'FRAGMENT 004 — [CORRUPTED]',
+        body: '█████ ██ ████ ██████████\n████ ████ ██ █████████████',
         secret: 'SEENOW',
     },
     {
-        title: 'FRAGMENT 005 — HE\'S WATCHING',
-        body: 'he\'s watching you.\n\nnot the bear.\nnot the beaver.\nsomething that arrived before either of them.\n\nit does not play.\nit does not lose.\nit observes.\n\nyou have been observed since before you opened this game.',
+        title: 'FRAGMENT 005',
+        body: 'he\'s watching you.\nhe was watching before you opened this.',
     },
     {
-        title: 'FRAGMENT 006 — THE SECOND STATE',
-        body: 'there are two game over states.\n\nthe first ends the game.\nthe second ends something else.\n\nif the second state appears —\ndo not click anything.\nclose the browser immediately.\n\nwe cannot tell you how to recognize it.\nyou will know.\nhe will make sure of it.',
+        title: 'FRAGMENT 006',
+        body: 'we cannot tell you how to recognize it.\nyou will know.',
     },
     {
-        title: 'FRAGMENT 007 — FROM A',
-        body: 'i built this in a week.\nit was supposed to be simple.\n\nsomething followed it out.\n\ni need someone to find me.\ni don\'t know if i mean that literally.\n\n— A',
+        title: 'FRAGMENT 007',
+        body: 'i need someone to find me.\n\n— A',
     },
 ];
 
@@ -187,7 +187,7 @@ class MenuScene extends Phaser.Scene {
 
         // SETTINGS | LORE smaller below
         this._makeSmallButton(cx - 110, 860, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
-        this._makeSmallButton(cx + 110, 860, 'LORE', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
+        this._makeSmallButton(cx + 110, 860, '???', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
 
         this.add.text(cx, H - 28, 'v0.173', {
             fontSize: '14px',
