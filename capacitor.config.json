@@ -1,0 +1,11 @@
+{
+  "appId": "com.berkington.app",
+  "appName": "Berkington",
+  "webDir": ".",
+  "server": {
+    "allowNavigation": []
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}
