@@ -1087,6 +1087,8 @@ function showGameOver() {
     const shouldGlitch = Math.random() < 0.15;
     if (shouldGlitch && typeof triggerBearGlitch === 'function') {
         triggerBearGlitch(_showGameOverPanel);
+    } else if (score >= 12000 && Math.random() < 0.10) {
+        showCharacterDialogue('kingGlaze', _showGameOverPanel);
     } else if (getAdminCharacter()) {
         showCharacterDialogue('gameOver', _showGameOverPanel);
     } else {

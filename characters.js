@@ -74,15 +74,13 @@ const BEAVER_DIALOGUES = {
         "your spatial reasoning has failed. diagnose and retry.",
         "fatal error incoming. prepare for game over.",
     ],
-    badPlacement: [
-        "you just isolated a cell. that space is gone forever.",
-        "dead zone created. suboptimal.",
-        "that gap is now unreachable. congratulations.",
-        "you boxed in an empty cell. why.",
-        "efficiency: negative. new dead cell detected.",
-        "i ran the simulation. that hole cannot be filled.",
-        "classic mistake. unfillable gap.",
-        "you've permanently wasted a cell. noted.",
+    badPlacement: [],
+    kingGlaze: [
+        "score logged. still below the benchmark.",
+        "12000 was set without effort. you required effort.",
+        "the record exists. you are not it.",
+        "insufficient. the standard has already been established.",
+        "you played well. he played differently.",
     ],
     gameOver: [
         "process terminated.",
@@ -140,6 +138,14 @@ const BEAR_DIALOGUES = {
         "the code has bugs and you STILL lost. impressive.",
         "tragic.",
         "get better. genuinely.",
+    ],
+    kingGlaze: [
+        "you will never be as good as him.",
+        "just stop here. we already have a king.",
+        "good score. wrong person.",
+        "he would have kept going.",
+        "12000. he didn't even try.",
+        "sit down.",
     ],
     glitch: [
         "did you think you were playing?",
