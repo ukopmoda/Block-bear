@@ -5,22 +5,24 @@ let _oceanLoaded = false;
 
 function _ensureAudioCtx() {
     if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+    if (_audioCtx.state === 'suspended') {
+        _audioCtx.resume();
+        // Silent buffer — required by iOS Safari to actually unlock the audio system
+        try {
+            const buf = _audioCtx.createBuffer(1, 1, 22050);
+            const src = _audioCtx.createBufferSource();
+            src.buffer = buf;
+            src.connect(_audioCtx.destination);
+            src.start(0);
+        } catch(e) {}
+    }
     return _audioCtx;
 }
 
-// iOS suspends AudioContext until a user gesture — play a silent buffer to fully unlock
-document.addEventListener('touchstart', function _iosAudioUnlock() {
-    try {
-        if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (_audioCtx.state === 'suspended') _audioCtx.resume();
-        const buf = _audioCtx.createBuffer(1, 1, 22050);
-        const src = _audioCtx.createBufferSource();
-        src.buffer = buf;
-        src.connect(_audioCtx.destination);
-        src.start(0);
-    } catch(e) {}
-}, { passive: true });
+// Belt-and-suspenders: also unlock on raw touchstart and touchend
+['touchstart', 'touchend'].forEach(ev =>
+    document.addEventListener(ev, () => { try { _ensureAudioCtx(); } catch(e) {} }, { passive: true })
+);
 
 function _sansBlip() {
     try {

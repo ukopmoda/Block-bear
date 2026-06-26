@@ -1,5 +1,5 @@
 const _isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-const _TOUCH_LIFT     = 270;  // logical units piece rides above finger on touch
+const _TOUCH_LIFT     = 250;  // logical units piece rides above finger on touch
 
 let score = 0;
 let scoreText;
@@ -200,6 +200,8 @@ class GameScene extends Phaser.Scene {
             (pointer, piece) => {
 
                 if (gameOver || piece.disabledForFit) return;
+
+                if (typeof _ensureAudioCtx === 'function') _ensureAudioCtx();
 
                 piece.setDepth(1000);
                 piece._dragPX = pointer.x;
