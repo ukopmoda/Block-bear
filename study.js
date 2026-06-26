@@ -1,17 +1,18 @@
 // study.js — Anki-style Russian flashcard system
 
-const _SRS_KEY = 'blockPuzzle_russian_srs';
+const _SRS_KEY    = 'blockPuzzle_russian_srs';
+const _STREAK_KEY = 'blockPuzzle_russian_streak';
 const _NEW_PER_SESSION = 20;
 
-// Intervals per level (milliseconds)
 const _INTERVALS = [
-    1  * 24 * 3600000,   // level 1 → 1 day
-    3  * 24 * 3600000,   // level 2 → 3 days
-    7  * 24 * 3600000,   // level 3 → 7 days
-    14 * 24 * 3600000,   // level 4 → 14 days
-    30 * 24 * 3600000,   // level 5 → 30 days (mastered)
+    1  * 24 * 3600000,
+    3  * 24 * 3600000,
+    7  * 24 * 3600000,
+    14 * 24 * 3600000,
+    30 * 24 * 3600000,
 ];
 
+// ── SRS ──────────────────────────────────────────────────────────────────────
 function _getSRS() {
     try { return JSON.parse(localStorage.getItem(_SRS_KEY) || '{}'); }
     catch(e) { return {}; }
@@ -32,23 +33,68 @@ function _buildSession() {
     const now   = Date.now();
     const due   = [];
     const fresh = [];
-
     RUSSIAN_WORDS.forEach((_, i) => {
         const e = data[i];
         if (!e || e.level === 0) { fresh.push(i); }
         else if (e.due <= now)   { due.push(i); }
     });
-
     const shuffleDue   = due.sort(() => Math.random() - 0.5);
     const shuffleFresh = fresh.sort(() => Math.random() - 0.5).slice(0, _NEW_PER_SESSION);
     return [...shuffleDue, ...shuffleFresh];
 }
 
+// Returns { due, new: newCount, total } for menu badge
+function getStudyDueCount() {
+    const data  = _getSRS();
+    const now   = Date.now();
+    let due = 0, newCount = 0;
+    RUSSIAN_WORDS.forEach((_, i) => {
+        const e = data[i];
+        if (!e || e.level === 0) newCount++;
+        else if (e.due <= now)   due++;
+    });
+    return { due, new: Math.min(newCount, _NEW_PER_SESSION), total: due + Math.min(newCount, _NEW_PER_SESSION) };
+}
+
+// ── Streak ────────────────────────────────────────────────────────────────────
+function _getStreak() {
+    try { return JSON.parse(localStorage.getItem(_STREAK_KEY) || '{"count":0,"lastDate":null}'); }
+    catch(e) { return { count: 0, lastDate: null }; }
+}
+
+function _updateStreak() {
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const s = _getStreak();
+    if (s.lastDate === today) return s;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    s.count = (s.lastDate === yesterday) ? s.count + 1 : 1;
+    s.lastDate = today;
+    localStorage.setItem(_STREAK_KEY, JSON.stringify(s));
+    return s;
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+function _speakRussian(text) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ru-RU';
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+}
+
+// ── Reverse mode toggle ───────────────────────────────────────────────────────
+const _REVERSE_KEY = 'blockPuzzle_russian_reverse';
+function _getReverseMode() { return localStorage.getItem(_REVERSE_KEY) === '1'; }
+function _setReverseMode(v) { localStorage.setItem(_REVERSE_KEY, v ? '1' : '0'); }
+
+// ── Main overlay ──────────────────────────────────────────────────────────────
 function openStudyOverlay(scene) {
     if (scene && scene.input) scene.input.enabled = false;
 
     const session = _buildSession();
     let idx = 0, sessionCorrect = 0, sessionTotal = 0;
+    let reverseMode = _getReverseMode();
 
     const el = document.createElement('div');
     el.style.cssText =
@@ -68,9 +114,14 @@ function openStudyOverlay(scene) {
         el.innerHTML = '';
         const wrap = document.createElement('div');
         wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
+        const streak = _getStreak();
+        const streakHtml = streak.count > 1
+            ? '<div style="color:#8a6040;font-size:13px;margin-bottom:32px;">' + streak.count + ' day streak</div>'
+            : '';
         wrap.innerHTML =
             '<div style="color:#5a4535;font-size:13px;letter-spacing:.14em;margin-bottom:18px;">all caught up.</div>' +
-            '<div style="color:#3d2b1f;font-size:14px;margin-bottom:48px;">come back tomorrow.</div>';
+            '<div style="color:#3d2b1f;font-size:14px;margin-bottom:36px;">come back tomorrow.</div>' +
+            streakHtml;
         const btn = document.createElement('button');
         btn.textContent = 'back to menu';
         btn.style.cssText = 'background:none;border:1px solid #5c4632;color:#8a6040;font-family:inherit;font-size:15px;padding:12px 36px;cursor:pointer;letter-spacing:.1em;';
@@ -80,16 +131,21 @@ function openStudyOverlay(scene) {
     }
 
     function renderSummary() {
+        const streak = _updateStreak();
         const data     = _getSRS();
         const seen     = Object.keys(data).length;
         const mastered = Object.values(data).filter(e => e.level >= 5).length;
         el.innerHTML = '';
         const wrap = document.createElement('div');
         wrap.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;';
+        const streakHtml = streak.count > 1
+            ? '<div style="color:#8a6040;font-size:13px;margin-bottom:28px;">' + streak.count + ' day streak</div>'
+            : '';
         wrap.innerHTML =
             '<div style="color:#3d2b1f;font-size:11px;letter-spacing:.16em;margin-bottom:32px;">SESSION COMPLETE</div>' +
             '<div style="color:#e8d9c0;font-size:56px;font-weight:bold;line-height:1;">' + sessionCorrect + '</div>' +
             '<div style="color:#5a4535;font-size:14px;margin-bottom:36px;">of ' + sessionTotal + ' correct</div>' +
+            streakHtml +
             '<div style="color:#6b4820;font-size:13px;margin-bottom:6px;">' + seen + ' / ' + RUSSIAN_WORDS.length + ' words seen</div>' +
             '<div style="color:#5a4535;font-size:13px;margin-bottom:52px;">' + mastered + ' mastered</div>';
         const btn = document.createElement('button');
@@ -104,26 +160,49 @@ function openStudyOverlay(scene) {
         if (idx >= session.length) { renderSummary(); return; }
 
         const wordIdx = session[idx];
-        const [ru, en] = RUSSIAN_WORDS[wordIdx];
+        const entry   = RUSSIAN_WORDS[wordIdx];
+        const ru    = entry[0];
+        const en    = entry[1];
+        const tag   = entry[2] || '';
+        const ex_ru = entry[3] || '';
+        const ex_en = entry[4] || '';
+
         const pct = Math.round((idx / session.length) * 100);
+
+        // In reverse mode: show English on face, reveal Russian
+        const face    = reverseMode ? en   : ru;
+        const answer  = reverseMode ? ru   : en;
+        const faceSize = reverseMode ? '28px' : '52px';
+
+        const tagHtml = tag
+            ? '<span style="display:inline-block;background:#1a1208;color:#5a4535;font-size:11px;' +
+              'padding:2px 8px;border-radius:2px;letter-spacing:.1em;margin-bottom:18px;">' + tag + '</span>'
+            : '';
 
         el.innerHTML =
             // header
-            '<div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:18px 22px;box-sizing:border-box;">' +
-                '<div style="color:#3d2b1f;font-size:13px;">' + (idx + 1) + ' / ' + session.length + '</div>' +
+            '<div style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:16px 22px;box-sizing:border-box;gap:8px;">' +
+                '<div style="color:#3d2b1f;font-size:12px;white-space:nowrap;">' + (idx + 1) + ' / ' + session.length + '</div>' +
+                '<button id="s-rev" style="background:none;border:1px solid ' + (reverseMode ? '#5c4632' : '#2a1f14') + ';' +
+                    'color:' + (reverseMode ? '#8a6040' : '#3d2b1f') + ';font-family:inherit;font-size:11px;' +
+                    'padding:4px 10px;cursor:pointer;letter-spacing:.08em;white-space:nowrap;">' +
+                    (reverseMode ? 'EN→RU ✓' : 'EN→RU') +
+                '</button>' +
                 '<button id="s-close" style="background:none;border:none;color:#3d2b1f;font-size:20px;cursor:pointer;padding:4px 8px;font-family:inherit;">✕</button>' +
             '</div>' +
-            // progress bar
+            // progress
             '<div style="width:100%;height:2px;background:#1a1208;">' +
                 '<div style="height:100%;background:#5c4632;width:' + pct + '%;"></div>' +
             '</div>' +
-            // card tap area
+            // card
             '<div id="s-card" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
-                'padding:40px 24px;cursor:pointer;width:100%;box-sizing:border-box;">' +
-                '<div style="color:#e8d9c0;font-size:52px;font-weight:bold;text-align:center;margin-bottom:36px;">' + ru + '</div>' +
+                'padding:40px 24px;cursor:pointer;width:100%;box-sizing:border-box;text-align:center;">' +
+                tagHtml +
+                '<div id="s-face" style="color:#e8d9c0;font-size:' + faceSize + ';font-weight:bold;text-align:center;margin-bottom:24px;line-height:1.2;">' + face + '</div>' +
+                '<button id="s-audio" style="background:none;border:none;color:#3d2b1f;font-size:22px;cursor:pointer;margin-bottom:28px;padding:6px 12px;line-height:1;" title="pronounce">🔊</button>' +
                 '<div id="s-reveal" style="color:#2a1f14;font-size:14px;letter-spacing:.1em;">tap to reveal</div>' +
             '</div>' +
-            // buttons (hidden until reveal)
+            // buttons
             '<div id="s-btns" style="display:flex;gap:20px;padding:28px 24px;opacity:0;pointer-events:none;transition:opacity 0.2s;justify-content:center;width:100%;box-sizing:border-box;">' +
                 '<button id="s-again" style="background:none;border:1px solid #5c2020;color:#8a3030;font-family:inherit;font-size:16px;padding:14px 0;cursor:pointer;letter-spacing:.06em;width:140px;">again</button>' +
                 '<button id="s-got"   style="background:none;border:1px solid #2a4a2a;color:#3a7a3a;font-family:inherit;font-size:16px;padding:14px 0;cursor:pointer;letter-spacing:.06em;width:140px;">got it ✓</button>' +
@@ -131,13 +210,34 @@ function openStudyOverlay(scene) {
 
         el.querySelector('#s-close').onclick = close;
 
+        // Reverse mode toggle
+        el.querySelector('#s-rev').onclick = (e) => {
+            e.stopPropagation();
+            reverseMode = !reverseMode;
+            _setReverseMode(reverseMode);
+            renderCard();
+        };
+
+        // Audio: speak the Russian word always
+        el.querySelector('#s-audio').onclick = (e) => {
+            e.stopPropagation();
+            _speakRussian(ru);
+        };
+
         let revealed = false;
         el.querySelector('#s-card').onclick = () => {
             if (revealed) return;
             revealed = true;
+
             const rv = el.querySelector('#s-reveal');
-            rv.textContent = en;
-            rv.style.cssText = 'color:#c8b89a;font-size:20px;text-align:center;max-width:380px;line-height:1.6;';
+            rv.innerHTML =
+                '<div style="color:#c8b89a;font-size:22px;text-align:center;max-width:380px;line-height:1.5;margin-bottom:20px;">' + answer + '</div>' +
+                (ex_ru
+                    ? '<div style="color:#7a5a38;font-size:13px;text-align:center;max-width:340px;margin-bottom:8px;line-height:1.6;font-style:italic;">' + ex_ru + '</div>' +
+                      '<div style="color:#4a3520;font-size:12px;text-align:center;max-width:340px;line-height:1.6;">' + ex_en + '</div>'
+                    : '');
+            rv.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+
             const btns = el.querySelector('#s-btns');
             btns.style.opacity = '1';
             btns.style.pointerEvents = 'auto';

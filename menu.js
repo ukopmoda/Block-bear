@@ -181,8 +181,10 @@ class MenuScene extends Phaser.Scene {
             setTimeout(() => this.scene.start('GameScene'), 480);
         });
 
-        // STUDY
-        this._makeButton(cx, 728, 'STUDY', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); openStudyOverlay(this); });
+        // STUDY — show pending card count
+        const _dueInfo = typeof getStudyDueCount === 'function' ? getStudyDueCount() : null;
+        const _studyLabel = (_dueInfo && _dueInfo.total > 0) ? 'STUDY  ' + _dueInfo.total : 'STUDY';
+        this._makeButton(cx, 728, _studyLabel, () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); openStudyOverlay(this); });
 
         // SKINS | CODE side by side
         this._makeButton(cx - 148, 808, 'SKINS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); skinsPanel.setVisible(true); });
@@ -192,7 +194,7 @@ class MenuScene extends Phaser.Scene {
         this._makeSmallButton(cx - 110, 882, 'SETTINGS', () => { if (typeof menuBearNod === 'function') menuBearNod(); if (typeof hideMenuBear === 'function') hideMenuBear(); settingsPanel.setVisible(true); });
         this._makeSmallButton(cx + 110, 882, '???', () => { if (typeof menuBearNod === 'function') menuBearNod(); _openLoreOverlay(this); });
 
-        this.add.text(cx, H - 28, 'v0.173', {
+        this.add.text(cx, H - 28, 'v0.178', {
             fontSize: '14px',
             color: '#3d2b1f',
         }).setOrigin(0.5);
