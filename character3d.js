@@ -582,11 +582,11 @@ function _position() {
     const rect = cv.getBoundingClientRect();
     const sx   = rect.width  / 900;
     const sy   = rect.height / 1000;
-    const GW = 300, GH = 220;
+    const GW = 300, GH = 200;
     const pw  = Math.round(GW * sx);
     const ph  = Math.round(GH * sy);
     const cl  = Math.round(rect.left + 20 * sx);
-    const ct  = Math.round(rect.top  + 780 * sy);
+    const ct  = Math.round(rect.top  + 820 * sy);
 
     _r.setSize(pw, ph);
     _r.domElement.style.left = cl + 'px';

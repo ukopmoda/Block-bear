@@ -971,7 +971,7 @@ function tryPlacePiece(piece) {
         showComboBubble("COMBO", 0);
     }
 
-    if (streak === 3 || streak === 6) {
+    if (streak === 5 || streak === 9) {
         showCharacterDialogue('bigStreak');
     }
 
@@ -980,7 +980,7 @@ function tryPlacePiece(piece) {
         const fillPct = getBoardFillPct();
         if (fillPct > 0.72) {
             const now = Date.now();
-            if (now - _dangerDialogueLast > 14000) {
+            if (now - _dangerDialogueLast > 28000) {
                 _dangerDialogueLast = now;
                 showCharacterDialogue('danger');
             }
